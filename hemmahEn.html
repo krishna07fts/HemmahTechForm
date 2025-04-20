@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Request Form</title>
+    <link rel="stylesheet" href="./style/hemmahstyle.css">
+    <script src="./script/hemmahscript.js" defer></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <!-- Line Awesome Icons -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+    <!-- Google Maps API Key -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLYS9P53EJjWCJWj34Z4qZfEmaNM2rU8c&amp;libraries=places&amp;language=en&amp;v=weekly"></script>
+
+</head>
+<div id="menuHeader" class="">
+    <div class="menu-header container containertop">
+        <div class="top">
+            <div class="image">
+                <a href="https://app.adjust.com/1m9h6dt6">
+                    <img src="assets/HemmaLogo.png" alt="">
+                </a>
+            </div>
+            <div class="">
+                <div class="language d-flex" style="align-items: baseline;">
+                    <div class="dropdown">
+                        <button class="dropbtn">
+                            ع <span class="arrow"></span>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="./hemmahEn.html" onclick="changeLanguage('en')">English</a>
+                            <a href="./hemmahAr.html" onclick="changeLanguage('ar')">عربي</a>
+                        </div>
+                    </div>
+                    <div class="icons_bar d-flex">
+                        <a href="https://api.whatsapp.com/send/?phone=966920013929&text&type=phone_number&app_absent=0" target="_blank">
+                            <img src="./assets/whatsapp.png" alt="whatsapp">
+                        </a>
+                        <a href="https://x.com/HemahTech" target="_blank">
+                            <img src="./assets/Twitter.png" alt="twitter">
+                        </a>
+                        <a href="https://www.instagram.com/hemahtech" target="_blank">
+                            <img src="./assets/Instagram.png" alt="instagram">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<body>
+    <div id="overlay"></div>
+    <div id="loader" style="display:none;">
+    </div>
+    <div class="form-container">
+        <h2>HemahTech Service Request Form</h2>
+        <form>
+            <div class="form-group">
+                <label for="name">Name <span class="red ml-auto">*</span></label>
+                <input class="form-control" type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Contact Number <span class="red ml-auto">*</span></label>
+                <input class="form-control" type="tel" maxlength="10" id="phone" name="phone" required>
+                <p id="error-message" style="color: red; display: none;">Mobile number must start with 05
+                    and must have exactly 10 digits</p>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address <span class="red ml-auto">*</span>
+                    <span class="ml-1">
+                        <label class="address-label">Create Address <i class="create las la-plus" data-toggle="modal" data-target=".createPopup"></i></label>                        
+                    </span>
+                </label>
+                <input type="hidden" id="addressvalue" name="address-value" required>
+                <input readonly class="form-control" type="text" id="address" name="address" required>
+            </div>
+
+            <div class="form-group d-none">
+                <label for="city">City <span class="red ml-auto">*</span></label>
+                <select class="form-control" id="city" name="city">
+                </select>
+            </div>
+
+            <div class="form-group d-none">
+                <label for="neighborhood">NeighborHood <span class="red ml-auto">*</span></label>
+                <select class="form-control" id="neighborhood" name="neighborhood">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="service">Service Type <span class="red ml-auto">*</span></label>
+                <select class="form-control" id="service" name="service">
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="visit-date">Visit Date <span class="red ml-auto">*</span></label>
+                    <input class="form-control" type="date" id="visit-date" name="visit-date" required>
+                </div>
+
+                <div class="form-group col-6">
+                    <label for="visit-Time">Visit Time <span class="red ml-auto">*</span></label>
+                    <input class="form-control" type="time" id="visit-Time" name="visit-Time" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-6 d-none">
+                    <label for="noofitemstowork">No of items to be fixed<span class="red ml-auto">*</span></label>
+                    <input class="form-control" type="number" id="noofitemstowork" name="noofitemstowork" required>
+                </div>
+
+                <div class="form-group col-6 d-none">
+                    <label for="haveTools">Do you have spare parts?<span class="red ml-auto">*</span></label>
+                    <select class="form-control" id="haveTools" name="haveTools">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group d-none">
+                <label for="details">Problem Description<span class="red ml-auto"></span></label>
+                <textarea rows="6" class="form-control" id="details" name="details" required></textarea>
+            </div>
+
+            <div class="button-container">
+                <button type="button" id="submitRequest">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</body>
+<div class="footer">
+    <div class="d-flex container" style="align-items: center;">
+        <div class="col" style="text-align: left;">
+            <a class="text-white">© Copyright 2021 All Rights Reserved</a>
+        </div>
+        <div class="col" style="text-align: center;">
+            <div class="icons_bar">
+                <a href="https://api.whatsapp.com/send/?phone=966920013929&text&type=phone_number&app_absent=0" target="_blank">
+                    <img src="./assets/whatsappwhite.png" alt="whatsapp">
+                </a>
+                <a href="https://x.com/HemahTech" target="_blank">
+                    <img src="./assets/TwiterWhite.png" alt="twitter">
+                </a>
+                <a href="https://www.instagram.com/hemahtech" target="_blank">
+                    <img src="./assets/InstagramWhite.png" alt="instagram">
+                </a>
+            </div>
+        </div>
+        <div class="col" style="text-align: right;">
+            <div class="image">
+                <img src="./assets/MawaridLogo.png" alt="logo">
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>
