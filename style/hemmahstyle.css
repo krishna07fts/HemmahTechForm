@@ -6,10 +6,11 @@ body {
 }
 
 .form-container {
-    width: 50%;
+    /* width: 50%; */
     margin: auto;
     padding: 20px;
     border-radius: 10px;
+    max-width: 900px;
 }
 
 select#service {
@@ -268,6 +269,35 @@ h5.modal-title {
   display: none;
 }
 
+#responseoverlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #3e3f40; 
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: none;
+}
+.sucessPage{
+  background-color: #dc4726;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  text-align: center;
+  margin: 60px;
+  height: calc(100% - 120px);
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+  align-items: center; 
+}
+.closeResponseoverlay{
+  background-color: #fff !important;
+  color: #dc4726 !important;
+}
+
 #loader {
   position: fixed;
   top: 50%;
@@ -356,4 +386,103 @@ h5.modal-title {
     unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+.tile-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tile {
+    flex: 1 1 calc(14.333% - 10px); /* 3 tiles per row on larger screens */
+    min-width: 114px;
+    box-sizing: border-box;
+    padding: 15px;
+    border: 1px solid #ccc;
+    text-align: center;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .tile.selected {
+    background-color: #dc4726;
+    color: white;
+    border-color: #dc4726;
+  }
+
+  .tile .day {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .tile .date {
+    color: inherit;
+  }
+
+  .time-tile {
+    flex: 1 1 calc(14% - 10px); /* Smaller width */
+    min-width: 114px;
+    max-width: 114px;
+    padding: 8px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background-color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+  
+  .time-tile.selected {
+    background-color: #dc4726;
+    color: white;
+    border-color: #dc4726;
+  }
+  
+
+  @media (max-width: 768px) {
+    .tile {
+      flex: 1 1 calc(50% - 10px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tile {
+      flex: 1 1 100%;
+    }
+  }
+
+  .upload-container {
+    position: relative;
+    width: 300px;
+  }
+  
+  #imageTextArea {
+    width: 100%;
+    height: 100px;
+    padding-right: 40px;
+    box-sizing: border-box;
+  }
+  .textarea-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  #imageTextArea {
+    width: 100%;
+    padding-right: 40px;
+    box-sizing: border-box;
+    resize: vertical;
+    height: 100px;
+  }
+  
+  .camera-icon {
+    position: absolute;
+    bottom: 65px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 25px;
+    cursor: pointer;
+    z-index: 2;
+}
 

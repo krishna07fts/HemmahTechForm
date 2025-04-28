@@ -1,16 +1,15 @@
+var serverUrl = "https://mawaridmanpower.com:5001";
+var neighborHood = document.getElementById("neighborhood");
+var selectedDate = "";
+var selectedTime = "";
+var VisitingDate = "";
+var Visitingtime = "";
+var attachment = "";
+var currentLanguage = document.documentElement.lang;
 document.addEventListener("DOMContentLoaded", function () {
   localStorage.clear();
   initMap();
   getAddressByContactNumber();
-  // getMaintenanceCity();
-  // document
-  //   .getElementById("neighborhood")
-  //   .addEventListener("click", function () {
-  //     getNeighbourHood();
-  //   });
-  // document.getElementById("city").addEventListener("click", function () {
-  //   getMaintenanceCity();
-  // });
   document.getElementById("service").addEventListener("click", function () {
     getServicesByAddressId();
   });
@@ -53,6 +52,123 @@ document.addEventListener("DOMContentLoaded", function () {
       modal.style.display = "block"; // Close the modal when clicked outside
     }
   };
+
+  document.getElementById("email").addEventListener("change", function () {
+    
+    const message = document.getElementById("message");
+    if (isValidEmail(this.value)) {
+      message.textContent = "";
+      return;
+    } else {
+     currentLanguage === "en" ? message.textContent = "Please enter a valid email" : message.textContent = "الرجاء إدخال بريد إلكتروني صالح";
+      message.style.color = "red";
+    }
+  });
+
+  const container = document.getElementById("dateTiles");
+  const timeContainer = document.getElementById("timeSlots");
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    const lang = currentLanguage;
+    const dayLabel =
+      i === 0
+         ? lang === "ar" ? "اليوم" : "Today"
+         : i === 1
+         ? lang === "ar" ? "غدًا" : "Tomorrow"
+         : date.toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", { weekday: "long" });
+
+
+    tile.innerHTML = `
+      <div class="day">${dayLabel}</div>
+      <div class="date">${date.getDate()}</div>
+    `;
+
+    tile.addEventListener("click", () => {
+      document
+        .querySelectorAll("#dateTiles .tile")
+        .forEach((t) => t.classList.remove("selected"));
+      tile.classList.add("selected");
+      selectedDate = new Date(date);
+      generateTimeSlots();
+    });
+
+    container.appendChild(tile);
+  }
+
+  function formatHour(hour) {
+    const suffix = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12;
+    return `${hour12} ${suffix}`;
+  }
+
+  function generateTimeSlots() {
+    timeContainer.innerHTML = "";
+    let currentDate = selectedDate ? selectedDate : new Date();
+    const now = new Date();
+    const isToday = currentDate.toDateString() === now.toDateString();
+    const startHour = 10;
+    const endHour = 22;
+    let currentHour = isToday
+      ? Math.max(startHour, now.getHours() + 1)
+      : startHour;
+    for (let hour = currentHour; hour < endHour; hour++) {
+      const from = formatHour(hour);
+      const to = formatHour(hour + 1);
+      const slot = document.createElement("div");
+      slot.className = "time-tile";
+      const formattedFromTime = from.includes("PM") && currentLanguage === "ar"
+        ? from.replace("PM", "م")
+        : from.includes("AM") && currentLanguage === "ar"
+        ? from.replace("AM", "م")
+        : from;
+
+        const formattedToTime = to.includes("PM") && currentLanguage === "ar"
+        ? to.replace("PM", "م")
+        : to.includes("AM") && currentLanguage === "ar"
+        ? to.replace("AM", "م")
+        : to;
+
+      slot.innerHTML = `<div class="time">${formattedFromTime} - ${formattedToTime}</div>`;
+
+      slot.addEventListener("click", () => {
+        document
+          .querySelectorAll("#timeSlots .time-tile")
+          .forEach((t) => t.classList.remove("selected"));
+        slot.classList.add("selected");
+        selectedTime = `${from} - ${to}`;
+        VisitingDate = currentDate.toISOString().split("T")[0];
+        Visitingtime = `${hour.toString().padStart(2, "0")}:00`;
+      });
+
+      timeContainer.appendChild(slot);
+    }
+  }
+
+  generateTimeSlots();
+
+  document.getElementById("cameraIcon").addEventListener("click", function () {
+    document.getElementById("imageUpload").click();
+  });
+
+  document
+    .getElementById("imageUpload")
+    .addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64 = e.target.result;
+        document.getElementById("imageTextArea").textContent = file?.name;
+        attachment = base64;
+      };
+      reader.readAsDataURL(file);
+    });
 });
 
 function checkMobileNumber() {
@@ -68,18 +184,25 @@ function checkMobileNumber() {
   }
 }
 
+function isValidEmail(email) {
+  
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
 function getAddressByContactNumber() {
+  
   const phoneInput = document.getElementById("phone");
   if (phoneInput) {
+    
     phoneInput.addEventListener("change", async function () {
+      
       if (!checkMobileNumber()) return;
       const phoneNumber = phoneInput.value;
-      const city = document.getElementById("city");
-      const neighborhood = document.getElementById("neighborhood");
       showLoader();
       try {
         const response = await fetch(
-          `https://mawaridmanpower.com:5001/api/Client/GetProfileByMobileNumber?MobileNumber=${phoneNumber}`,
+          `${serverUrl}/api/Client/GetProfileByMobileNumber?MobileNumber=${phoneNumber}`,
           {
             method: "Get",
             mode: "cors",
@@ -93,27 +216,20 @@ function getAddressByContactNumber() {
             "Warning: Address Information Not Found Please Create New Address"
           );
         }
-        if(data && data.code == 200){
+        if (data && data.code == 200) {
           localStorage.clear();
           localStorage.setItem("clientId", data.content.clientID);
         }
-        if (data && data.code == 200 &&  data.content.mainAddress != null && data.content.mainAddress.addressTitle) {
+        if (
+          data &&
+          data.code == 200 &&
+          data.content.mainAddress != null &&
+          data.content.mainAddress.addressTitle
+        ) {
           addressvalue.value = data.content.mainAddress.addressId;
           address.value = data.content.mainAddress.addressTitle;
-          city.innerHTML = `<option value="${
-            data.content.mainAddress.cityID
-          }">${
-            data.content.mainAddress.cityEn +
-            "-" +
-            data.content.mainAddress.cityAr
-          }</option>`;
-          neighborhood.innerHTML = `<option value="${
-            data.content.mainAddress.neighbourhoodID
-          }">${
-            data.content.mainAddress.neighbourhoodEn +
-            "-" +
-            data.content.mainAddress.neighbourhoodAr
-          }</option>`;
+          neighborHood.value = data.content.mainAddress.neighbourhoodID;
+          neighborHood.textContent = data.content.mainAddress.neighbourhoodID;
         } else if (data.code == 404) {
           registerUser(phoneNumber);
         }
@@ -127,11 +243,12 @@ function getAddressByContactNumber() {
   }
 }
 function changeLanguage(lang) {
-  document.documentElement.lang = lang;
+  
+  currentLanguage = lang;
   document.body.dir = lang === "ar" ? "rtl" : "ltr";
 }
 async function registerUser(phoneNumber) {
-  const apiUrl = `https://mawaridmanpower.com:5001/api/Client/NewRegister`;
+  const apiUrl = `${serverUrl}/api/Client/NewRegister`;
   showLoader();
   try {
     const response = await fetch(apiUrl, {
@@ -158,7 +275,7 @@ async function registerUser(phoneNumber) {
 }
 async function getMaintenanceCity() {
   const selectElement = document.getElementById("city");
-  const apiUrl = `https://mawaridmanpower.com:5001/api/Address/GetMaintenanceCities`;
+  const apiUrl = `${serverUrl}/api/Address/GetMaintenanceCities`;
   showLoader();
   try {
     const response = await fetch(apiUrl);
@@ -191,7 +308,7 @@ async function getNeighbourHood() {
     alert("Please select city first");
     return;
   }
-  const apiUrl = `https://mawaridmanpower.com:5001/api/Address/GetNeighbourhoodsByCity?cityid=${cityId.value}`;
+  const apiUrl = `${serverUrl}/api/Address/GetNeighbourhoodsByCity?cityid=${cityId.value}`;
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -220,13 +337,8 @@ async function getNeighbourHood() {
   }
 }
 async function getServicesByAddressId() {
-  const neighborHoodId = document.getElementById("neighborhood");
   const selectElement = document.getElementById("service");
-  // if (neighborHoodId.value == "") {
-  //   alert("Create address to proceed");
-  //   return;
-  // }
-  const apiUrl = `https://mawaridmanpower.com:5001/api/General/GetAllServices?NeighborhoodID=${neighborHoodId.value}`;
+  const apiUrl = `${serverUrl}/api/General/GetAllServices?NeighborhoodID=${neighborHood.textContent}`;
   showLoader();
   try {
     const response = await fetch(apiUrl);
@@ -285,7 +397,7 @@ function initMap() {
 async function getCurrentNeighborHoodByLatLang(lat, lng) {
   const neighborHood = document.getElementById("createneighborhood");
   const city = document.getElementById("createcity");
-  const apiUrl = `https://mawaridmanpower.com:5001/api/Address/GetCurrentNeighbourhood?Latitude=${lat}&Longitiude=${lng}`;
+  const apiUrl = `${serverUrl}/api/Address/GetCurrentNeighbourhood?Latitude=${lat}&Longitiude=${lng}`;
   showLoader();
   try {
     const response = await fetch(apiUrl);
@@ -324,11 +436,9 @@ async function createAddress() {
   const contact = document.getElementById("contactid");
   const addresstitle = document.getElementById("addresstitle");
   const buildingno = document.getElementById("buildingno");
-  // const preferedPhone = document.getElementById("preferedPhone");
-  // const isMain = document.getElementById("isMain");
   const buildingType = document.getElementById("buildingType");
   const neighborhood = document.getElementById("createneighborhood");
-  const apiUrl = `https://mawaridmanpower.com:5001/api/Address/AddAddress`;
+  const apiUrl = `${serverUrl}/api/Address/AddAddress`;
   const data = {
     contactId: contact.value,
     addressTitle: addresstitle.value,
@@ -369,14 +479,12 @@ async function createAddress() {
     hideLoader();
     if (responseData.code == 200) {
       alert("Address created successfully");
+      document.getElementById("addressModal").style.display = "none";
       document.getElementById("addressvalue").value =
         responseData.content.addressId;
       document.getElementById("address").value = addresstitle.value;
-      document.getElementById("city").value = city.value;
-      console.log(document.getElementById("createneighborhood").value);
       document.getElementById("neighborhood").innerHTML =
         neighborhood.innerHTML;
-      document.getElementById("addressModal").style.display = "none";
     } else {
       alert(responseData.message);
     }
@@ -409,39 +517,48 @@ function clearRequestCreateForm() {
   document.getElementById("phone").value = "";
   document.getElementById("address").value = "";
   document.getElementById("addressvalue").value = "";
-  document.getElementById("city").value = "";
+  // document.getElementById("city").value = "";
   document.getElementById("neighborhood").value = "";
   document.getElementById("addressvalue").value = "";
-  document.getElementById("visit-date").value = "";
-  document.getElementById("visit-Time").value = "";
+  // document.getElementById("visit-date").value = "";
+  // document.getElementById("visit-Time").value = "";
   document.getElementById("service").value = "";
-  document.getElementById("noofitemstowork").value = "";
-  document.getElementById("details").value = "";
-  document.getElementById("haveTools").value = "";
+  // document.getElementById("noofitemstowork").value = "";
+  // document.getElementById("details").value = "";
+  // document.getElementById("haveTools").value = "";
+  document.getElementById("email").value = "";
+  VisitingDate = null;
+  Visitingtime = null;
+  neighborHood.value = "";
+  selectedDate = null;
+  selectedTime = null;
+  attachment = null;
 }
 
 async function createRequest() {
-  const date = document.getElementById("visit-date").value;
-  const time = document.getElementById("visit-Time").value;
-  const combined = `${date}T${time}:00`;
+  const combined = `${VisitingDate}T${Visitingtime}:00`;
 
-  const apiUrl = `https://mawaridmanpower.com:5001/api/WorkOrder/CreateWorkOrderSadad`;
+  const apiUrl = `${serverUrl}/api/WorkOrder/CreateWorkOrderSadad`;
   const data = {
     customerID: localStorage.getItem("clientId"),
     customerAddressID: document.getElementById("addressvalue").value,
     service: document.getElementById("service").value,
-    // document.getElementById("noofitemstowork").value
     numberOfItems: 1,
-    // document.getElementById("details").value
-    problemDescription: "From Website",
+    problemDescription:
+      document.getElementById("problemdescription").value + "",
     startDate: combined,
-    // document.getElementById("haveTools").value
+    descriptionAttachment: attachment,
     customerHasTools: true,
   };
-  if(
+  data.problemDescription =
+    "Problem Description: " +
+    data.problemDescription +
+    " " +
+    `customerId = '${data.customerID}', customerAddressID = '${data.customerAddressID}', service = '${data.service}', numberOfItems = '${data.numberOfItems}', problemDescription = '${data.problemDescription}', startDate = '${data.startDate}', customerHasTools = '${data.customerHasTools}'`;
+    if (
     !data.customerID ||
     !data.customerAddressID ||
-    !data.service ||  
+    !data.service ||
     !data.numberOfItems ||
     !data.problemDescription ||
     !data.startDate ||
@@ -450,6 +567,7 @@ async function createRequest() {
     alert("Please fill all fields");
     return;
   }
+
   showLoader();
   try {
     const response = await fetch(apiUrl, {
@@ -462,8 +580,13 @@ async function createRequest() {
     const responseData = await response.json();
     hideLoader();
     if (responseData.code == 200) {
-      alert(`Thanks for contacting us, Your request number is ${responseData.content.requestNo}`);
+      // alert(
+      //   `Thanks for contacting us, Your request number is ${responseData.content.requestNo}`
+      // );
+      document.getElementById("reqid").textContent = responseData.content.requestNo;
       clearRequestCreateForm();
+      showResponseOverlay();
+      // window.location.reload();
     } else {
       alert(responseData.message);
     }
@@ -471,4 +594,16 @@ async function createRequest() {
     hideLoader();
     console.error("Error fetching data:", error);
   }
+}
+
+function showResponseOverlay(){
+  document.getElementById("responseoverlay").style.display = "block";
+}
+
+document.getElementById("closeResponseoverlay").addEventListener("click", function () {
+  hideResponseOverlay();
+});
+function hideResponseOverlay(){
+  document.getElementById("responseoverlay").style.display = "none";
+  window.location.reload();
 }

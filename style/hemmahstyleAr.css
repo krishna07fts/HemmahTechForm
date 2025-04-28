@@ -12,5 +12,13 @@ input[type="date"] {
   input[type="date"]::-webkit-calendar-picker-indicator {
     direction: ltr !important;
 }
-  
+
+body[dir="rtl"] .camera-icon {
+  right: auto;
+  left: 10px;
+}
+  .camera-icon{
+    left: 10px !important;
+    right: auto !important;
+  }
   
