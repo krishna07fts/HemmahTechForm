@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const reader = new FileReader();
       reader.onload = function (e) {
         const base64 = e.target.result;
-        document.getElementById("imageTextArea").textContent = file?.name;
+        // document.getElementById("imageTextArea").textContent = file?.name;
         attachment = base64;
       };
       reader.readAsDataURL(file);
